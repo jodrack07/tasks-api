@@ -39,19 +39,48 @@ const createTask = async (req, res) => {
     try {
         const newTask = await Task.create(req.body)
         // res.send('Create a task')
-        res.status(201).json({ newTask });     
+        res.status(201).json({ newTask, status: 'success' });     
     } catch (error) {
         // console.log('Error : ', error);
         res.status(500).json({ message : error });
     }
 }
 
-const updateTask = (req, res) => {
-    res.send('Update task')
+const updateTask = async (req, res) => {
+    try {
+        const { id:taskID } = req.params;
+        /**
+         * #new: true# will allow as getting the updated version of the document since by default findOneAndUpdate returns the old version of the doc
+         * #runValidators: true# will apply the validation so that we may get some error when necessary.
+         */
+        const task = await Task.findOneAndUpdate({ _id: taskID }, req.body, {
+            new: true,
+            runValidators: true
+        })
+
+        if(!task) {
+            res.status(404).json({ message: `Cannot update a task with id: ${taskID} as it does not exist` });
+        }
+
+        res.status(200).json({ task });
+    } catch (error) {
+        res.status(404).json({ message: error })
+    }
 }
 
-const deleteTask = (req, res) => {
-    res.send('Delete task')
+const deleteTask = async (req, res) => {
+    try {
+        const { id:taskID } = req.params; 
+        const task = await Task.findOneAndDelete({ _id: taskID });
+    
+        if(!task) {
+            return res.status(404).json({ message: `Cannot delete a task with id: ${taskID} as it does not exist` })
+        }
+    
+        res.status(200).json({ task, status: 'success' });
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
 }
 
 module.exports = {
