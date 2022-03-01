@@ -3,12 +3,31 @@
 // task model
 const Task = require('../models/Task');
 
-const getAllTaks = (_, res) => {
-    res.send('Get all tasks')
+const getAllTaks = async (_, res) => {
+    try {
+        const tasks = await Task.find({});
+        res.status(200).json({tasks});
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
 }
 
-const getTask = (req, res) => {
-    res.send('Get a single Task')
+const getTask = async (req, res) => {
+    try {
+        // the taskID gonna be the alias of the #id
+        const { id:taskID } = req.params;
+        const task = await Task.findOne({ _id: taskID });
+    
+        // if bad _id get passed, the above #task variable will be undefined and may cause some issues. It need to be handled
+        if(!task) {
+            return res.status(404).json({ message: `Task with id ${taskID} has not been found.` });
+        }
+        
+        res.status(200).json({ task });
+        
+    } catch (error) {
+        res.status(500).json({ message: error });
+    }
 }
 
 const createTask = async (req, res) => {
@@ -23,7 +42,7 @@ const createTask = async (req, res) => {
         res.status(201).json({ newTask });     
     } catch (error) {
         // console.log('Error : ', error);
-        res.status(500).json({ MainError: error, msg: MainError.message });
+        res.status(500).json({ message : error });
     }
 }
 
