@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const { DBConnection } = require('./db/connect');
 require('dotenv').config();
+// custom error handler
+const errorHandler = require('./middlewares/errorHandler');
 
 // routers
 const tasksRouter = require('./routes/tasks.rt');
@@ -17,6 +19,8 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
 app.use('/api/tasks', tasksRouter);
+
+app.use(errorHandler);
 
 app.get('/*', (req, res) => {
     res.status(404).sendFile(path.join(__dirname, 'public', '404.html'));
